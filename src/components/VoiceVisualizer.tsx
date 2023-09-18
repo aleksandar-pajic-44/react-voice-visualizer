@@ -60,6 +60,7 @@ interface VoiceVisualizerProps {
   isAudioProcessingTextShown?: boolean;
   audioProcessingTextClassName?: string;
   controlButtonsClassName?: string;
+  useBeforeUnloadEvent?: boolean;
 }
 
 type Ref = HTMLAudioElement | null;
@@ -116,6 +117,7 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
       isAudioProcessingTextShown = true,
       audioProcessingTextClassName,
       controlButtonsClassName,
+      useBeforeUnloadEvent = true
     },
     ref,
   ) => {
@@ -215,12 +217,16 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
     ]);
 
     useEffect(() => {
-      if (!isCleared) {
-        window.addEventListener("beforeunload", handleBeforeUnload);
+      if (useBeforeUnloadEvent) {
+        if (!isCleared) {
+          window.addEventListener("beforeunload", handleBeforeUnload);
+        }
       }
 
       return () => {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
+        if (useBeforeUnloadEvent) {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+        }
       };
     }, [isCleared]);
 
@@ -430,12 +436,12 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
               >
                 {isProgressIndicatorTimeOnHoverShown && (
                   <p
-                    className={`voice-visualizer__progress-indicator-hovered-time 
+                    className={`voice-visualizer__progress-indicator-hovered-time
                     ${
                       canvasCurrentWidth - hoveredOffsetX < 70
                         ? "voice-visualizer__progress-indicator-hovered-time-left"
                         : ""
-                    } 
+                    }
                     ${progressIndicatorTimeOnHoverClassName ?? ""}`}
                   >
                     {formatRecordedAudioTime(
