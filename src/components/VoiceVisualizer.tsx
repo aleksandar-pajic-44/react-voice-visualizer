@@ -215,6 +215,16 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
     ]);
 
     useEffect(() => {
+      if (!isCleared) {
+        window.addEventListener("beforeunload", handleBeforeUnload);
+      }
+
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }, [isCleared]);
+
+    useEffect(() => {
       if (!bufferFromRecordedBlob) return;
 
       if (isRecordedCanvasHovered) {
@@ -326,6 +336,11 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
       }
     }, [isProcessingRecordedAudio]);
 
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
     const showTimeIndicator = () => {
       setIsRecordedCanvasHovered(true);
     };
@@ -415,12 +430,12 @@ const VoiceVisualizer = forwardRef<Ref, VoiceVisualizerProps>(
               >
                 {isProgressIndicatorTimeOnHoverShown && (
                   <p
-                    className={`voice-visualizer__progress-indicator-hovered-time
+                    className={`voice-visualizer__progress-indicator-hovered-time 
                     ${
                       canvasCurrentWidth - hoveredOffsetX < 70
                         ? "voice-visualizer__progress-indicator-hovered-time-left"
                         : ""
-                    }
+                    } 
                     ${progressIndicatorTimeOnHoverClassName ?? ""}`}
                   >
                     {formatRecordedAudioTime(
